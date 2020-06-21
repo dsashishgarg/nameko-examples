@@ -1,0 +1,54 @@
+#!/bin/bash
+
+show_help(){
+  echo "NEX Deployment needs prefix"
+  echo "Usage: "
+  echo "      devops/nex-deploy.sh [-p] [-s] [-x] appname ... where:"
+  echo "      -p means production backing service else dev plan"
+  echo "         eg: devops/pmc-deploy.sh -x appname"
+}
+
+while getopts ':px' OPTION; do
+  case "$OPTION" in
+    p )
+			PRODPLAN=TRUE
+      ;;
+    x )
+			SHARED_BACKING=TRUE
+      SKIPBROKER=TRUE
+      ;;
+		\? )
+      show_help
+			exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+# ensure app-prefix is pass in
+if [ $# -lt 1 ] ; then
+  show_help
+  exit 1
+fi
+
+PREFIX=$1
+echo "Using prefix: $PREFIX"
+
+if [ -z "$PRODPLAN" ]; then
+  echo "Using development plan for backing services"
+  PLAN_RABBIT=lemur
+  PLAN_POSTGRES=turtle
+  PLAN_REDIS=30mb
+else
+  echo "Using production plan for backing services"
+  PLAN_RABBIT=v3.7 
+  PLAN_POSTGRES=v9
+  PLAN_REDIS=standard
+fi
+
+# Creating Backing services
+echo "# Creating backing service for ${PREFIX}-namekoexample"
+cf cs cloudamqp ${PLAN_RABBIT} ${PREFIX}-rabbitmq
+cf cs elephantsql ${PLAN_POSTGRES} ${PREFIX}-postgres
+cf cs rediscloud ${PLAN_REDIS} ${PREFIX}-redis
+

@@ -1,0 +1,42 @@
+# ---
+# applications:
+#     - name: namekoexample
+#       memory: 1G
+#       disk_quota: 3GB
+#       timeout: 180
+#       health-check-type: process
+#       buildpacks:
+#         - python_buildpack
+#       services:
+#         - nex-rabbitmq
+#         - nex-postgres
+#         - nex-redis
+#       env:
+#         NODE_ENV: production
+#         REACT_APP_NAME: Banktegrator
+#         MONGO_URL: mongodb://127.0.0.1
+#         CF_STAGING_TIMEOUT: 30
+#         CF_STARTUP_TIMEOUT: 15
+
+---
+defaults: &defaults
+  buildpacks:
+    - python_buildpack
+  memory: 1G
+  disk_quota: 4G
+  health-check-type: process
+  no-route: true
+  services:
+    - nex-rabbitmq
+    - nex-postgres
+    - nex-redis
+  env:
+    APP_ENV: HelloWorld
+
+
+applications:
+  - name: namekoexample
+    <<: *defaults
+    no-route: false
+    health-check-type: port
+    command: bash ./run.sh gateway.service products.service orders.service
