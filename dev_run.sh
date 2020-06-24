@@ -4,7 +4,7 @@ export POSTGRES_URI=postgres://postgres:postgres@localhost:5432/orders
 export REDIS_URI=redis://localhost:6379/dev
 
 # Check if rabbit is up and running before starting the service.
-until nc -z localhost 15672; do
+until nc -z localhost 5672; do
     echo "$(date) - waiting for rabbitmq..."
     sleep 2
 done
